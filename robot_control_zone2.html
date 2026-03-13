@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Zone 2: Header Module</title>
+    <style>
+        /* Zone 2 전체 컨테이너 스타일 (회색 배경 바탕) */
+        body { margin: 0; background-color: #eef1f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .header-zone {
+            display: flex;
+            justify-content: space-between; /* 양쪽 끝으로 밀어내기 */
+            align-items: center;
+            padding: 15px 30px;
+        }
+
+        /* 좌측 로봇 이름 텍스트 */
+        .robot-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 우측 상태 카드들을 묶는 컨테이너 */
+        .status-panel {
+            display: flex;
+            gap: 15px; /* 카드 사이 간격 */
+        }
+
+        /* 개별 하얀색 상태 카드 스타일 */
+        .status-card {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 14px;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 강조되는 숫자 데이터 스타일 */
+        .highlight-val {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="zone2-app"></div>
+
+    <script>
+        // Zone 2의 UI와 데이터를 관리하는 클래스 정의
+        class Zone2Header {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+            }
+
+            // 데이터를 받아 HTML 구조를 생성하는 메서드
+            render(data) {
+                const htmlString = `
+                    <div class="header-zone">
+                        <div class="robot-title">
+                            ${data.robotName} 
+                            <span style="font-size: 16px; color: #7f8c8d;">▼</span>
+                        </div>
+
+                        <div class="status-panel">
+                            <div class="status-card">
+                                on <span class="highlight-val">${data.onCount}</span> &nbsp;|&nbsp; 
+                                off <span class="highlight-val">${data.offCount}</span>
+                            </div>
+                            <div class="status-card">
+                                배터리 잔량 <span class="highlight-val">${data.batteryPct}% ⚡</span>
+                            </div>
+                            <div class="status-card">
+                                배터리 전압 <span class="highlight-val">${data.batteryVolt} V</span>
+                            </div>
+                            <div class="status-card">
+                                CPU <span class="highlight-val">${data.cpuPct}%</span>
+                            </div>
+                            <div class="status-card">
+                                Memory <span class="highlight-val">${data.memPct}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                this.container.innerHTML = htmlString;
+                console.log("✅ Zone 2 (Header) 렌더링 완료!");
+            }
+        }
+
+        // ====== 프로그램 실행부 (Main) ======
+        window.onload = () => {
+            // 1. 서버에서 받아왔다고 가정하는 로봇 상태 데이터
+            const robotData = {
+                robotName: "SEONGSU_03",
+                onCount: 14,
+                offCount: 0,
+                batteryPct: 98,
+                batteryVolt: 49,
+                cpuPct: 2,
+                memPct: 33
+            };
+
+            // 2. 클래스 인스턴스 생성 및 데이터 주입 실행
+            const headerModule = new Zone2Header("zone2-app");
+            headerModule.render(robotData);
+        };
+    </script>
+</body>
+</html>
