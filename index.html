@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NARCHON Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 글로벌 헤더 -->
+    <header class="global-header">
+        <div class="logo"><span class="logo-icon">🔵</span> NARCHON</div>
+        <div class="header-right">
+            <div class="search-box">🔍 검색</div>
+            <div class="user-profile">
+                <span class="admin-role">최고 관리자</span>
+                <span class="admin-name">hyundai.kim</span>
+            </div>
+            <div class="header-icons">🔔 🌐 KR ∨ 59:48 연장 로그아웃</div>
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <!-- Zone 1: 오직 어두운 좌측 메뉴바만 -->
+        <aside class="side-menu">
+            <ul class="icon-list">
+                <li class="menu-item"><span class="icon">⭐</span><span class="label">즐겨찾기</span></li>
+                <li class="menu-item"><span class="icon">🎛️</span><span class="label">대시보드</span></li>
+                <li class="menu-item active"><span class="icon">🖥️</span><span class="label">모니터링</span></li>
+                <li class="menu-item"><span class="icon">🤖</span><span class="label">로봇 운영</span></li>
+                <li class="menu-item"><span class="icon">🛣️</span><span class="label">시나리오</span></li>
+                <li class="menu-item"><span class="icon">🦾</span><span class="label">로봇 서비스</span></li>
+                <li class="menu-item"><span class="icon">📄</span><span class="label">로그</span></li>
+                <li class="menu-item"><span class="icon">⚙️</span><span class="label">설정</span></li>
+            </ul>
+            <div class="profile-icon"><span>👤</span></div>
+        </aside>
+
+        <!-- 우측 전체 영역 (지도 + 패널 + 하단컨트롤) -->
+        <div class="dashboard-area">
+            
+            <!-- 상단: 타이틀 + Zone 2 -->
+            <div class="top-status-row">
+                <div class="banner-title">SEONGSU_03 <span class="arrow-down">∨</span></div>
+                <div class="zone-2">
+                    <div class="status-box">on <strong>14</strong></div>
+                    <div class="status-box">off <strong>0</strong></div>
+                    <div class="status-box">배터리 잔량 <strong>98 % ⚡</strong></div>
+                    <div class="status-box">배터리 전압 <strong>49 V</strong></div>
+                    <div class="status-box">CPU <strong>2 %</strong></div>
+                    <div class="status-box border-none">Memory <strong>33 %</strong></div>
+                </div>
+            </div>
+
+            <!-- 중앙 콘텐츠: 지도 + 우측 패널 -->
+            <div class="middle-content-row">
+                <!-- Zone 3: 지도 영역 (오버레이 포함) -->
+                <div class="map-area">
+                    
+                    <!-- 1) 배너 오버레이 (좌측 상단 둥둥) -->
+                    <div class="map-banner-floating">
+                        <div class="banner-icons">
+                            <button class="icon-btn active">📍</button>
+                            <button class="icon-btn">🗺️</button>
+                        </div>
+                        <div class="banner-info">
+                            <span class="info-label">Elevator : </span><span class="info-value">L04</span>
+                            <span class="info-divider"></span>
+                            <span class="info-label">Floor </span><span class="info-value">B1F</span>
+                        </div>
+                        <div class="banner-speed">0.95 <span>m/s</span></div>
+                    </div>
+
+                    <!-- 2) 층수 리스트 오버레이 (좌측 하단 둥둥) -->
+                    <div class="floor-menu-floating">
+                        <ul class="floor-list">
+                            <li class="floor-item">10F</li>
+                            <li class="floor-item">9F</li>
+                            <li class="floor-item">8F <span class="badge">1</span></li>
+                            <li class="floor-item">7F</li>
+                            <li class="floor-item">6F</li>
+                            <li class="floor-item">5F</li>
+                            <li class="floor-item">4F</li>
+                            <li class="floor-item">3F</li>
+                            <li class="floor-item">2F</li>
+                            <li class="floor-item">1F</li>
+                            <li class="floor-item active">B1F <span class="badge">3</span></li>
+                            <li class="floor-item">B2F</li>
+                            <li class="floor-item">B3F</li>
+                        </ul>
+                    </div>
+
+                    <!-- 배경 지도 이미지 -->
+                    <img src="main_center.jpg" alt="Main Map" class="map-image">
+                </div>
+
+                <!-- 🚀 팀원이 만든 Zone 4: 우측 패널이 이 안으로 쏙 들어갑니다! -->
+                <div class="right-panel-area">
+                    <!-- Javascript가 이 div 안에 차트와 카메라를 그려줄 것입니다 -->
+                    <div id="zone4-app" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- 하단: Zone 5 -->
+            <div class="bottom-control-row">
+                <div class="control-placeholder">Zone 5 (Control & Log)</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 🚀 팀원이 작성한 Zone 4 자바스크립트 코드 구동부 -->
+    <script>
+        class Zone4Dashboard {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+            }
+
+            generateChartBars(dataArray) {
+                let barsHtml = '';
+                dataArray.forEach(val => {
+                    const heightPct = Math.min(val, 100); 
+                    barsHtml += `<div class="bar" style="height: ${heightPct}%;"></div>`;
+                });
+                return barsHtml;
+            }
+
+            render(data) {
+                const chartHtml = this.generateChartBars(data.chartData);
+
+                // 🚀 수정: 백틱( ` )으로 HTML 전체를 감싸주어야 합니다.
+                const htmlString = `
+                    <div class="dashboard-panel">
+                        <!-- Latency 카드 -->
+                        <div class="panel-card">
+                            <div class="latency-header">Latency</div>
+                            <div class="latency-numbers">
+                                <div class="val-blue">${data.controlLatency} <span class="unit">ms</span></div>
+                                <div class="val-green">${data.robotLatency} <span class="unit">ms</span></div>
+                            </div>
+                            <div class="chart-container">
+                                ${chartHtml}
+                            </div>
+                            <div class="legend">
+                                <span><span class="dot-blue"></span> 관제 레이턴시</span>
+                                <span><span class="dot-green"></span> 로봇 레이턴시</span>
+                            </div>
+                        </div>
+
+                        <!-- Camera 카드 (사용자님이 주신 이미지로 덮기) -->
+                        <div class="panel-card camera-card">
+                            <img src="camera.jpg" alt="Camera View" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    </div>
+                `; // 🚀 여기서 백틱( ` ) 닫기
+                
+                this.container.innerHTML = htmlString;
+            }
+        }
+
+        window.onload = () => {
+            const dashboardData = {
+                controlLatency: 55,
+                robotLatency: 93,
+                cameraState: "IDLE",
+                chartData: [20, 35, 40, 60, 80, 50, 45, 70, 90, 85, 60, 50, 40, 30, 80, 100, 70, 65]
+            };
+            const dashboardModule = new Zone4Dashboard("zone4-app");
+            dashboardModule.render(dashboardData);
+        };
+
+    </script>
+</body>
+</html>
