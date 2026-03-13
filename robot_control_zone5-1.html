@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Zone 5: Footer Control Module (Upgraded)</title>
+    <style>
+        body { margin: 0; padding: 20px; background-color: #eef1f5; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .footer-zone { display: flex; gap: 20px; height: 300px; }
+        .box { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; }
+        .tabs { margin-bottom: 15px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .tab-active { color: #3498db; font-weight: bold; margin-right: 15px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .tab-inactive { color: #95a5a6; margin-right: 15px; }
+
+        /* 1. 왼쪽 로그 */
+        .log-section { flex: 2; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th { color: #7f8c8d; padding: 10px 5px; border-bottom: 1px solid #ecf0f1; }
+        td { padding: 10px 5px; border-bottom: 1px solid #f7f9fa; color: #2c3e50; }
+
+        /* 2. 중앙 제어 */
+        .control-section { flex: 1.5; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .btn-grid-large { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; height: 80px; }
+        .btn-grid-bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .ctrl-btn { background-color: #f8f9fa; border: 1px solid #ecf0f1; border-radius: 8px; padding: 15px; cursor: pointer; font-weight: bold; color: #2c3e50; transition: all 0.2s ease; }
+        .ctrl-btn:hover { background-color: #3498db; color: white; border-color: #3498db; }
+        .btn-active { background-color: #3498db; color: white; }
+
+        /* 3. 오른쪽 원격 제어 */
+        .remote-section { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .remote-header { width: 100%; display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 30px; }
+        
+        /* 🌟 [추가] 슬라이드 토글 스위치 디자인 */
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #3498db; } /* 켜졌을 때 파란색 */
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .d-pad { display: grid; grid-template-columns: 50px 50px 50px; gap: 10px; text-align: center; }
+        .dpad-btn { width: 50px; height: 50px; border-radius: 8px; border: 1px solid #ecf0f1; background-color: #ffffff; cursor: pointer; font-size: 18px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s ease; }
+        .dpad-btn:hover { background-color: #3498db; color: white; }
+        
+        /* 🌟 [추가] 클릭되어 활성화된 상태를 유지하는 클래스 */
+        .dpad-active { background-color: #3498db; color: white; border-color: #3498db; }
+
+        .up { grid-column: 2; }
+        .left { grid-column: 1; }
+        .down { grid-column: 2; }
+        .right { grid-column: 3; }
+        .rot-left { grid-column: 1; margin-top: 10px; }
+        .rot-right { grid-column: 3; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="footer-zone" id="zone5-app">
+        <div class="box log-section">
+            <div class="tabs"><span class="tab-active">시나리오 모니터링 로그</span><span class="tab-inactive">모니터링 제어 로그</span></div>
+            <table>
+                <tr><th>날짜</th><th>시나리오명</th><th>액티비티 아이디</th><th>이름</th></tr>
+                <tr><td>2026.03.13 14:09</td><td>advertiseTask</td><td>Gateway_0opf41g</td><td>-</td></tr>
+                <tr><td>2026.03.13 14:08</td><td>advertiseTask</td><td>Activity_1f3b3dk</td><td>홍보화면 (GUI)</td></tr>
+                <tr><td>2026.03.13 14:08</td><td>advertiseTask</td><td>Activity_06utusw</td><td>이동 명령 (BM)</td></tr>
+            </table>
+        </div>
+
+        <div class="box control-section">
+            <div class="tabs"><span class="tab-active">로봇 제어</span><span class="tab-inactive">수동 제어</span><span class="tab-inactive">관리자 제어</span></div>
+            <div class="btn-grid"><button class="ctrl-btn">⚡ 충전소 이동</button><button class="ctrl-btn">🔊 TTS 발화</button><button class="ctrl-btn">📦 적재함 열기</button></div>
+            <div class="btn-grid-large"><button class="ctrl-btn">📍 시작 위치 설정</button><button class="ctrl-btn btn-active">⏸️ 일시정지</button></div>
+            <div class="btn-grid-bottom"><button class="ctrl-btn" style="background:#f1f2f6; color:#95a5a6;">⏻ 시나리오 종료</button><button class="ctrl-btn">🔄 서비스 재시작</button><button class="ctrl-btn" style="background:#2c3e50; color:white;">⚙️ 시스템 종료</button></div>
+        </div>
+
+        <div class="box remote-section">
+            <div class="remote-header">
+                <span>원격 제어</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="remote-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="d-pad">
+                <button class="dpad-btn up" onclick="setActiveDpad(this)">▲</button>
+                <button class="dpad-btn left" onclick="setActiveDpad(this)">◀</button>
+                <button class="dpad-btn down" onclick="setActiveDpad(this)">▼</button>
+                <button class="dpad-btn right" onclick="setActiveDpad(this)">▶</button>
+                <button class="dpad-btn rot-left" onclick="setActiveDpad(this)">↺</button>
+                <button class="dpad-btn rot-right" onclick="setActiveDpad(this)">↻</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🌟 [추가] 방향키를 누르면 해당 버튼만 파란색으로 고정시키는 함수
+        function setActiveDpad(clickedButton) {
+            // 1. 모든 방향키에서 'dpad-active' 클래스(파란색 상태)를 지웁니다.
+            const allButtons = document.querySelectorAll('.dpad-btn');
+            allButtons.forEach(btn => btn.classList.remove('dpad-active'));
+            
+            // 2. 방금 클릭한 버튼에만 'dpad-active' 클래스를 붙여줍니다.
+            clickedButton.classList.add('dpad-active');
+            
+            console.log("명령 전송됨:", clickedButton.innerText);
+        }
+    </script>
+</body>
+</html>
