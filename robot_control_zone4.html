@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Zone 4: Dashboard Module</title>
+    <style>
+        /* 화면 전체 배경 (Zone 2와 맞춤) */
+        body { margin: 0; padding: 20px; background-color: #eef1f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Zone 4 전체를 감싸는 우측 패널 */
+        .dashboard-panel {
+            width: 400px;
+            height: 600px; /* 👈 추가! 전체 패널의 높이를 넉넉하게(Zone 3 지도 높이만큼) 잡아줍니다. */
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 카드 사이의 세로 간격 */
+            float: right; /* 임시로 화면 우측에 배치 */
+        }
+
+        /* 공통 카드 스타일 */
+        .panel-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- 1. Latency (히스토그램) 카드 스타일 --- */
+        .latency-header { color: #95a5a6; font-size: 14px; margin-bottom: 10px; }
+        .latency-numbers { display: flex; flex-direction: column; gap: 5px; float: left; width: 30%; }
+        .val-blue { color: #3498db; font-size: 32px; font-weight: bold; }
+        .val-green { color: #2ecc71; font-size: 32px; font-weight: bold; }
+        .unit { font-size: 16px; font-weight: normal; }
+
+        /* 막대그래프(히스토그램) 컨테이너 */
+        .chart-container {
+            float: right;
+            width: 65%;
+            height: 80px;
+            display: flex;
+            align-items: flex-end; /* 막대기를 바닥으로 정렬 */
+            gap: 4px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        /* 개별 파란색 막대기 */
+        .bar {
+            background-color: #3498db;
+            width: 10px;
+            border-radius: 2px 2px 0 0;
+            transition: height 0.3s ease;
+        }
+
+        /* 범례 (Legend) */
+        .legend { clear: both; padding-top: 15px; font-size: 11px; color: #7f8c8d; text-align: right; }
+        .legend span { margin-left: 10px; }
+        .dot-blue { display: inline-block; width: 8px; height: 8px; background: #3498db; border-radius: 50%; }
+        .dot-green { display: inline-block; width: 8px; height: 8px; border: 2px solid #2ecc71; border-radius: 50%; }
+
+        /* --- 2. Camera (로봇 영상) 카드 스타일 --- */
+        .camera-card { padding: 0; background-color: #2c3e50; height: 220px; display: flex; align-items: center; justify-content: center; color: white; margin-top: auto; 
+        /* 👈 핵심 마법 추가! 자신 위의 빈 공간을 전부 밀어내고 맨 밑으로 붙습니다. */ }
+        .cam-badge { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .cam-num { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .cam-controls { position: absolute; bottom: 15px; width: calc(100% - 30px); display: flex; justify-content: space-between; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+    <div id="zone4-app"></div>
+
+    <script>
+        // Zone 4 (대시보드 패널) UI와 데이터를 관리하는 클래스 정의
+        class Zone4Dashboard {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+            }
+
+            // 차트 막대기(HTML 요소)를 동적으로 생성하는 헬퍼 메서드
+            generateChartBars(dataArray) {
+                let barsHtml = '';
+                dataArray.forEach(val => {
+                    // 최대 높이를 80px로 잡고 비율 계산
+                    const heightPct = Math.min(val, 100); 
+                    barsHtml += `<div class="bar" style="height: ${heightPct}%;"></div>`;
+                });
+                return barsHtml;
+            }
+
+            // 데이터를 받아 HTML 구조를 생성하는 메서드
+            render(data) {
+                const chartHtml = this.generateChartBars(data.chartData);
+
+                const htmlString = `
+                    <div class="dashboard-panel">
+                        
+                        <div class="panel-card">
+                            <div class="latency-header">Latency</div>
+                            
+                            <div class="latency-numbers">
+                                <div class="val-blue">${data.controlLatency} <span class="unit">ms</span></div>
+                                <div class="val-green">${data.robotLatency} <span class="unit">ms</span></div>
+                            </div>
+                            
+                            <div class="chart-container">
+                                ${chartHtml}
+                            </div>
+                            
+                            <div class="legend">
+                                <span><span class="dot-blue"></span> 관제 레이턴시</span>
+                                <span><span class="dot-green"></span> 로봇 레이턴시</span>
+                            </div>
+                        </div>
+
+                        <div class="panel-card camera-card">
+                            <div class="cam-badge">CAM 1 : ${data.cameraState}</div>
+                            <div class="cam-num">1</div>
+                            
+                            <div style="color: #7f8c8d;">카메라 신호 대기 중...</div>
+
+                            <div class="cam-controls">
+                                <span>▶</span> <span>⛶</span> </div>
+                        </div>
+
+                    </div>
+                `;
+                this.container.innerHTML = htmlString;
+                console.log("✅ Zone 4 (Dashboard) 렌더링 완료!");
+            }
+        }
+
+        // ====== 프로그램 실행부 (Main) ======
+        window.onload = () => {
+            // 1. 서버에서 받아왔다고 가정하는 지연 시간 및 카메라 데이터
+            const dashboardData = {
+                controlLatency: 55,
+                robotLatency: 93,
+                cameraState: "IDLE",
+                // 히스토그램 막대기 높이를 결정하는 가상의 데이터 배열 (0~100 사이)
+                chartData: [20, 35, 40, 60, 80, 50, 45, 70, 90, 85, 60, 50, 40, 30, 80, 100, 70, 65]
+            };
+
+            // 2. 클래스 인스턴스 생성 및 데이터 주입 실행
+            const dashboardModule = new Zone4Dashboard("zone4-app");
+            dashboardModule.render(dashboardData);
+        };
+    </script>
+</body>
+</html>
