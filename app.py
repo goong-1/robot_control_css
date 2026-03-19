@@ -63,7 +63,7 @@ robot_manager = RobotMockManager()
 @app.route('/')
 def dashboard():
     # templates 폴더 안의 dashboard.html을 띄워줍니다!
-    return render_template('dashboard.html')
+    return render_template('index.html')
 
 @app.route('/api/robot_stats')
 def get_robot_stats():
